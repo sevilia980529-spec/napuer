@@ -79,11 +79,22 @@
       }
       .nav .brand-link .zh { font-size: 22px; font-weight: 600; letter-spacing: 0.35em; }
       .nav .brand-link .en { font-family: var(--latin); font-size: 13px; letter-spacing: 0.32em; opacity: 0.75; }
-      .nav nav { display: flex; gap: clamp(4px, 2vw, 26px); flex-wrap: wrap; justify-content: flex-end; }
+      .nav nav { display: flex; gap: clamp(4px, 2vw, 26px); flex-wrap: nowrap; justify-content: flex-end; }
       .nav nav a {
-        text-decoration: none; font-size: 14px; letter-spacing: 0.28em;
+        text-decoration: none; font-size: 14px; letter-spacing: 0.28em; white-space: nowrap;
         padding: 10px 6px; min-height: 44px; display: inline-flex; align-items: center;
         opacity: 0.82;
+      }
+      @media (max-width: 680px) {
+        .nav { padding: 0 14px; min-height: 56px; }
+        .nav .brand-link { gap: 6px; }
+        .nav .brand-link .zh { font-size: 19px; letter-spacing: 0.18em; }
+        .nav .brand-link .en { font-size: 11px; letter-spacing: 0.2em; }
+        .nav-right { gap: 8px; }
+        .nav nav { gap: 2px; }
+        .nav nav a { font-size: 13px; letter-spacing: 0.1em; padding: 8px 4px; min-height: 40px; }
+        body.en .nav nav a { font-size: 12.5px; letter-spacing: 0.04em; }
+        .lang-btn { min-width: 40px; min-height: 40px; padding: 6px 10px; font-size: 12px; letter-spacing: 0.12em; }
       }
       .nav nav a:hover, .nav nav a.active { opacity: 1; color: var(--gold-soft); }
       .nav.solid nav a:hover, .nav.solid nav a.active { color: var(--gold); }
@@ -125,7 +136,6 @@
       body.en .frame .c-slogan { letter-spacing: 0.16em; }
       body.en .frame .c-place { letter-spacing: 0.2em; }
       body.en footer .f-soon { letter-spacing: 0.2em; }
-      body.en .sound-btn { letter-spacing: 0.14em; }
       body.en .scroll-hint { letter-spacing: 0.2em; }
       /* english mode: bilingual pairs collapse to a single english line */
       body.en .en-label { display: none; }
@@ -176,13 +186,18 @@
       .hero .slogan { font-size: clamp(19px, 3.2vw, 27px); letter-spacing: 0.42em; margin: 40px 0 0; font-weight: 600; }
       .hero .slogan-en { font-family: var(--latin); font-style: italic; font-size: clamp(15px, 2.2vw, 19px); letter-spacing: 0.14em; margin: 12px 0 0; color: #cfc39f; }
       .sound-btn {
-        position: absolute; z-index: 3; right: clamp(18px, 4vw, 44px); bottom: 30px;
-        min-width: 44px; min-height: 44px; padding: 10px 18px;
+        position: absolute; z-index: 3; right: clamp(18px, 4vw, 44px); bottom: 26px;
+        width: 44px; height: 44px; padding: 0;
+        display: inline-flex; align-items: center; justify-content: center;
         background: rgba(8, 30, 21, 0.42); color: #efe7d2;
-        border: 1px solid rgba(239, 231, 210, 0.45); border-radius: 999px;
-        font-family: var(--serif); font-size: 13px; letter-spacing: 0.3em; cursor: pointer;
+        border: 1px solid rgba(239, 231, 210, 0.45); border-radius: 50%;
+        cursor: pointer;
         backdrop-filter: blur(6px);
       }
+      .sound-btn svg { width: 20px; height: 20px; display: block; }
+      .sound-btn .ic-on { display: none; }
+      .sound-btn.on .ic-on { display: block; }
+      .sound-btn.on .ic-off { display: none; }
       .sound-btn:hover { border-color: var(--gold-soft); color: var(--gold-soft); }
       .scroll-hint {
         position: absolute; z-index: 3; left: clamp(18px, 4vw, 44px); bottom: 30px;
@@ -350,7 +365,10 @@
         <p class="slogan-en">Nature's gift, aged with time.</p>
       </div>
       <div class="scroll-hint" aria-hidden="true">向下</div>
-      <button class="sound-btn" id="soundBtn" type="button" aria-pressed="false">开启声音</button>
+      <button class="sound-btn" id="soundBtn" type="button" aria-pressed="false" aria-label="开启声音">
+        <svg class="ic-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6.5 9H3v6h3.5L11 19z" fill="currentColor" stroke="none" /><line x1="16" y1="9.5" x2="21" y2="14.5" /><line x1="21" y1="9.5" x2="16" y2="14.5" /></svg>
+        <svg class="ic-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6.5 9H3v6h3.5L11 19z" fill="currentColor" stroke="none" /><path d="M15.5 9.2a4 4 0 0 1 0 5.6" /><path d="M18.4 6.6a7.6 7.6 0 0 1 0 10.8" /></svg>
+      </button>
     </section>
 
     <!-- 品牌 -->
@@ -518,8 +536,10 @@
         var btn = document.getElementById("soundBtn");
         window.__naSoundLabel = function () {
           var en = document.documentElement.lang === "en";
-          btn.textContent = video.muted ? (en ? "Sound On" : "开启声音") : (en ? "Mute" : "静音");
+          btn.setAttribute("aria-label", video.muted ? (en ? "Turn sound on" : "开启声音") : (en ? "Mute" : "静音"));
+          btn.classList.toggle("on", !video.muted);
         };
+        window.__naSoundLabel();
         btn.addEventListener("click", function () {
           video.muted = !video.muted;
           if (!video.muted) { video.play(); }
